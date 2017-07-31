@@ -1,0 +1,92 @@
+Apache Flink Cluster Setup on CentOS-7 Kernel Version 3.10.0-229.11.1.el7.x86_64  [CentOS Linux release 7.1.1503 (Core)]
+
+Prerequisites:
+1. Create 3 Centos-7 Machine one act as Master and two as salves
+In my case 172.16.5.175 (master) and 172.16.5.176-177 slave
+
+2. Set hostname 
+   hostnamectl set-hostname master
+   hostnamectl set-hostname slave01
+   hostnamectl set-hostname slave02
+   
+3. Add Entries in hosts file (/etc/host)
+
+   MASTER-IP master
+   SLAVE01-IP slave01
+   SLAVE02-IP slave02
+   
+   NOTE: In place of MASTER-IP, SLAVE01-IP, SLAVE02-IP put the value of corresponding IP
+   
+ 4. Install Java 8 (Recommended Oracle Java)
+    cd /opt
+    wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u144-b01/090f390dda5b47b9b721c7dfaa008135/jdk-8u144-linux-x64.tar.gz"
+    cd /opt/jdk1.8.0_144/
+    tar -xvf jdk-8u144-linux-x64.tar.gz
+    alternatives --install /usr/bin/java java /opt/jdk1.8.0_144/bin/java 2
+   
+     alternatives --config java
+    
+     alternatives --install /usr/bin/jar jar /opt/jdk1.8.0_144/bin/jar 2
+     alternatives --install /usr/bin/javac javac /opt/jdk1.8.0_144/bin/javac 2
+     alternatives --set jar /opt/jdk1.8.0_144/bin/jar
+     alternatives --set javac /opt/jdk1.8.0_144/bin/javac
+     java -version
+      
+     export JAVA_HOME=/opt/jdk1.8.0_144
+     export JRE_HOME=/opt/jdk1.8.0_144/jre
+	   export PATH=$PATH:/opt/jdk1.8.0_144/bin:/opt/jdk1.8.0_144/jre/bin
+     
+ 5. Install Flink on RedHat/CentOS:
+ 
+   wget http://www-eu.apache.org/dist/flink/flink-1.3.1/flink-1.3.1-bin-hadoop2-scala_2.10.tgz
+	 tar -xvf flink-1.3.1-bin-hadoop2-scala_2.10.tgz
+	 export FLINK_HOME=/opt/flink-1.3.1/
+	 export PATH=$PATH:$FLINK_HOME/bin
+   
+ 6. Edit flink-conf.yaml:
+     Edit configuration file flink-conf.yaml (located in FLINK_HOME/conf) and specify master node (Job Manager):
+     
+     vi flink-conf.yaml
+     jobmanager.rpc.address: master
+     
+  7. Edit Slaves:
+     Edit configuration file slaves (located in FLINK_HOME/conf) and add following entries:
+     vi slaves
+     slave01
+     slave02
+     
+  8. Install Flink On Slaves:
+     Setup Pre-requisites on all the slaves:
+     Run following steps on all the slaves:
+
+     “1.1. Add Entries in hosts file”
+     “1.2. Install Java 8 (Recommended Oracle Java)”
+     
+    Repeat Step 6 and 7 on Slave Nodes
+    
+  9. Start the Apache Flink Cluster:
+    
+     Once Flink setup on Master and slave is completed, we need to start the Flink services as below:
+
+    Start the Services:
+    $bin/start-cluster.sh
+    (Note: Run this command on Master)
+    
+    
+   Check whether services have been started
+
+  Use the commands as shown below to check the status of the services:
+  Check daemons on Master
+  $jps
+  JobManager
+ Check daemons on Slaves
+  $jps
+  TaskManager
+  
+10. Access Flink Web UI
+    http://<Master-IP>:8081
+    
+    The UI will show the information about job manager, task managers, jobs, etc.
+   
+   
+   
